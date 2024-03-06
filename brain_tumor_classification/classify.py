@@ -12,7 +12,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
 from model import TumorClassificationCNN
-from hyperparams import BATCH_SIZE
+from hyperparams import BATCH_SIZE, LEARNING_RATE, EPOCHS
 from visualize import show_sample
 
 
@@ -24,8 +24,8 @@ def main():
         train_dl,
         val_dl,
         BATCH_SIZE,
-        epochs=10,
-        learning_rate=0.001,
+        epochs=EPOCHS,
+        learning_rate=LEARNING_RATE,
     )
 
 
