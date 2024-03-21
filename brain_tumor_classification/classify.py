@@ -2,6 +2,8 @@ from typing import Tuple, List
 import time
 import pickle
 import os
+import numpy as np
+import torch
 
 from torch import Generator, optim, Tensor, no_grad
 from torch.nn import Module as CNN
@@ -11,14 +13,15 @@ from torch.utils.data import random_split
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from model import TumorClassificationCNN
-from hyperparams import BATCH_SIZE, LEARNING_RATE, EPOCHS
-from visualize import show_sample
+from model import TumorClassificationCNN_Conv, TumorClassificationCNN_FC, TumorClassificationCNN_Mixed
+from hyperparams import BATCH_SIZE, LEARNING_RATE, EPOCHS, INPUT_SIZE, CLASSES
+from visualize import show_sample, show_classification, plot_train_res
 
 
 def main():
-    train_dl, val_dl, test_dl = load_data()
-    model = TumorClassificationCNN()
+    train_dl, val_dl, test_dl = load_data(force_reread=True)
+    print(f"Data has been loaded. Batches: train: {len(train_dl)} val: {len(val_dl)} test: {len(test_dl)}")
+    model = TumorClassificationCNN_Mixed()
     train_h, val_h = train(
         model,
         train_dl,
@@ -27,6 +30,61 @@ def main():
         epochs=EPOCHS,
         learning_rate=LEARNING_RATE,
     )
+    test(model, test_dl)
+    plot_train_res(train_h, val_h)
+    pass
+
+
+def peek():
+    train_dl, val_dl, test_dl = load_data(force_reread=True)
+    for batch in train_dl:
+        for i in range(0, BATCH_SIZE):
+            show_sample(batch[0][i], batch[1][i])
+
+
+def test(model: CNN, test_loader: DataLoader):
+    # tracking test loss
+    test_loss = 0.0
+    class_correct = [0.0] * len(CLASSES)
+    class_total = [0.0] * len(CLASSES)
+    points = np.array([[0] * len(CLASSES) for _ in range(len(CLASSES))], np.int32)
+
+    model.eval()  # Prepare model for testing
+    criterion = CrossEntropyLoss()
+
+    for data, target in test_loader:
+        # forward pass
+        output = model(data)
+        # batch loss
+        loss = criterion(output, target)
+        # test loss update
+        test_loss += loss.item() * data.size(0)
+        # convert output probabilities to predicted class
+        _, pred = torch.max(output, 1)
+        # compare predictions to true label
+        correct_tensor = pred.eq(target.data.view_as(pred))
+        correct = np.squeeze(correct_tensor.numpy())
+        # calculate test accuracy for each object class
+        for i in range(len(target)):
+            label = target.data[i]
+            class_correct[label] += correct[i].item()
+            class_total[label] += 1
+            points[int(pred.data[i]), int(label)] += 1
+
+    # average test loss
+    test_loss = test_loss / len(test_loader.dataset)
+    print(f"Test Loss: {test_loss:.4f}")
+
+    for i, label in enumerate(CLASSES):
+        if class_total[i] > 0:
+            print(f"Test Accuracy of {label}: {100*class_correct[i]/class_total[i]:.3f}%")
+        else:
+            print(f"Test Accuracy of {label}s: N/A (no training examples)")
+
+    print(
+        f"Full Test Accuracy: {round(100. * np.sum(class_correct) / np.sum(class_total), 2)}% {np.sum(class_correct)} out of {np.sum(class_total)}"
+    )
+    show_classification(points)
 
 
 def load_data(force_reread=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
@@ -41,9 +99,7 @@ def load_data(force_reread=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
     SOURCE = "D:\\Project\\Dipterv\\Datasets\\brain_tumor_mri_2d_4class\\{purpose}"
 
     # Check the saved obejects
-    if force_reread is False and all(
-        os.path.exists(FILE_TEMPLATE.format(file=f)) for f in OUTPUTS
-    ):
+    if force_reread is False and all(os.path.exists(FILE_TEMPLATE.format(file=f)) for f in OUTPUTS):
         result: List[DataLoader] = []
         for file in OUTPUTS:
             with open(FILE_TEMPLATE.format(file=file), "rb") as in_file:
@@ -54,9 +110,9 @@ def load_data(force_reread=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
     transform_default = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Resize((256, 256)),
+            transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
             transforms.Grayscale(num_output_channels=1),
-            # transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            transforms.Normalize((0.5), (0.5)),
         ]
     )
     transform_horizontal_flip = transforms.Compose(
@@ -124,7 +180,8 @@ def load_data(force_reread=False) -> Tuple[DataLoader, DataLoader, DataLoader]:
 
 def create_loss_and_optimizer(net: CNN, learning_rate=0.001):
     criterion = CrossEntropyLoss()
-    optimizer = optim.SGD(net.parameters(), lr=learning_rate)
+    # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate)
     return criterion, optimizer
 
 
@@ -135,7 +192,7 @@ def train(
     batch_size: int,
     epochs: int,
     learning_rate: float,
-):
+) -> Tuple[List[float], List[float]]:
     print("----Hyperparameters----")
     print(f"batch_size = {batch_size}")
     print(f"epochs = {epochs}")
@@ -169,9 +226,9 @@ def train(
             if (i + 1) % (log_period + 1) == 0:
                 delta_time = time.time() - training_start_time
                 print(
-                    "Epoch {epoch}, {progress:.0f}% \t train_loss: {loss:.2f} \t time: {m} minutes {s} seconds".format(
+                    "Epoch {epoch}, {progress:.0f}% \t train_loss: {loss:.4f} \t time: {m:.0f} minutes {s:.0f} seconds".format(
                         epoch=epoch + 1,
-                        progress=i / batches,
+                        progress=i / batches * 100,
                         loss=running_loss / log_period,
                         m=delta_time // 60,
                         s=delta_time % 60,
@@ -188,14 +245,16 @@ def train(
                 predictions = net(inputs)
                 val_loss: Tensor = criterion(predictions, labels)
                 total_val_loss += val_loss.item()
-                # TODO Túltanulás kezelés: earliy stopping
+        val_loss_h = total_val_loss / val_batches
 
-        val_history.append(total_val_loss / val_batches)
-        print(f"Validation loss = {total_val_loss/val_batches:.2f}")
+        val_history.append(val_loss_h)
+        print(f"Validation loss = {val_loss_h:.4f}")
+
+        # if epoch > 2:
+        #     if val_loss_h > val_history[-1] and val_loss_h > val_history[-2]:
+        #         break  # stop the training if overfitting
     delta_time = time.time() - training_start_time
-    print(
-        f"Training Finished, took {delta_time // 60} minutes {delta_time % 60} seconds"
-    )
+    print(f"Training Finished, took {delta_time // 60:.0f} minutes {delta_time % 60:.0f} seconds")
     return train_history, val_history
 
 
