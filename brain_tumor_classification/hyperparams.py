@@ -31,5 +31,5 @@ def print_hyperparams():
     print(f"learning_rate = {LEARNING_RATE}")
     print(f"input_size = {INPUT_SIZE}")
     print(f"model = {MODEL.__class__.__name__}")
-    summary(MODEL)
+    summary(MODEL, (1, INPUT_SIZE, INPUT_SIZE))
     print()
