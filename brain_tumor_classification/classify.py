@@ -13,7 +13,7 @@ from redirect import Redirect
 
 
 def main():
-    with Redirect(bypass=True) as test_case_number:
+    with Redirect() as test_case_number:
         print_hyperparams()
         train_dl, val_dl, test_dl = load_data()
         print(f"Data has been loaded. Batches: train: {len(train_dl)} val: {len(val_dl)} test: {len(test_dl)}")

@@ -28,7 +28,7 @@ class Redirect:
         self._original_out = sys.stdout
         self._n = self._get_next_test_case_number()
         result_file_path = self._RESULTS_PATH / self._NAME_TEMPLATE.format(n=self._n)
-        self._files = [result_file_path.open("wt")] if not bypass else []
+        self._files = [result_file_path.open("wt", encoding="utf-8")] if not bypass else []
 
     def __enter__(self) -> int:
         self._redirect_print_to_files(self._files)
