@@ -5,43 +5,39 @@ from torch.nn import Module as CNN
 from torch.nn import CrossEntropyLoss
 from torch.utils.data.dataloader import DataLoader
 
-from model import (
-    TumorClassificationCNN_Conv,
-    TumorClassificationCNN_FC,
-    TumorClassificationCNN_Mixed,
-    TumorClassificationCNN_Conv_Norm,
-)
-from hyperparams import BATCH_SIZE, LEARNING_RATE, EPOCHS, CLASSES
-from visualize import show_sample, show_classification, plot_train_res
+from hyperparams import BATCH_SIZE, LEARNING_RATE, EPOCHS, CLASSES, MODEL, print_hyperparams
+from visualize import show_sample, save_classification_plot, save_train_res_plot
 from train import train
 from loader import load_data
+from redirect import Redirect
 
 
 def main():
-    train_dl, val_dl, test_dl = load_data(force_reread=True)
-    print(f"Data has been loaded. Batches: train: {len(train_dl)} val: {len(val_dl)} test: {len(test_dl)}")
-    model = TumorClassificationCNN_Conv_Norm()
-    train_h, val_h = train(
-        model,
-        train_dl,
-        val_dl,
-        BATCH_SIZE,
-        epochs=EPOCHS,
-        learning_rate=LEARNING_RATE,
-    )
-    test(model, test_dl)
-    plot_train_res(train_h, val_h)
-    pass
+    with Redirect(bypass=True) as test_case_number:
+        print_hyperparams()
+        train_dl, val_dl, test_dl = load_data()
+        print(f"Data has been loaded. Batches: train: {len(train_dl)} val: {len(val_dl)} test: {len(test_dl)}")
+        model = MODEL
+        train_h, val_h = train(
+            model,
+            train_dl,
+            val_dl,
+            BATCH_SIZE,
+            epochs=EPOCHS,
+            learning_rate=LEARNING_RATE,
+        )
+        test(model, test_dl, test_case_number)
+        save_train_res_plot(train_h, val_h, test_case_number)
 
 
 def peek():
-    train_dl, val_dl, test_dl = load_data(force_reread=True)
+    train_dl, val_dl, test_dl = load_data()
     for batch in train_dl:
         for i in range(0, BATCH_SIZE):
             show_sample(batch[0][i], batch[1][i])
 
 
-def test(model: CNN, test_loader: DataLoader):
+def test(model: CNN, test_loader: DataLoader, test_case_number: int):
     # tracking test loss
     print("Testing model")
     test_loss = 0.0
@@ -84,7 +80,7 @@ def test(model: CNN, test_loader: DataLoader):
     print(
         f"Full Test Accuracy: {round(100. * np.sum(class_correct) / np.sum(class_total), 2)}% {np.sum(class_correct)} out of {np.sum(class_total)}"
     )
-    show_classification(points)
+    save_classification_plot(points, test_case_number)
 
 
 if __name__ == "__main__":

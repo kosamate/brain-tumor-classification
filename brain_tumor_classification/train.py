@@ -20,11 +20,6 @@ def train(
     epochs: int,
     learning_rate: float,
 ) -> Tuple[List[float], List[float]]:
-    print("----Hyperparameters----")
-    print(f"batch_size = {batch_size}")
-    print(f"epochs = {epochs}")
-    print(f"learning_rate = {learning_rate}")
-    print()
 
     batches = len(train_dl)
     val_batches = len(val_dl)
@@ -34,6 +29,21 @@ def train(
     train_history = []
     val_history = []
     training_start_time = int(time.time())
+
+    total_val_loss = 0.0
+    # Do a pass on the validation set# We don't need to compute gradient,
+    # we save memory and computation using th.no_grad()
+    with no_grad():
+        net.eval()
+        for inputs, labels in val_dl:
+            # Forward pass
+            predictions = net(inputs)
+            val_loss: Tensor = criterion(predictions, labels)
+            total_val_loss += val_loss.item()
+    net.train()
+    val_loss_h = total_val_loss / val_batches
+    print(f"Validation loss = {val_loss_h:.4f}")
+
     for epoch in range(epochs):
         # loop over the dataset multiple times
         running_loss = 0.0
@@ -67,11 +77,13 @@ def train(
         # Do a pass on the validation set# We don't need to compute gradient,
         # we save memory and computation using th.no_grad()
         with no_grad():
+            net.eval()
             for inputs, labels in val_dl:
                 # Forward pass
                 predictions = net(inputs)
                 val_loss: Tensor = criterion(predictions, labels)
                 total_val_loss += val_loss.item()
+        net.train()
         val_loss_h = total_val_loss / val_batches
 
         val_history.append(val_loss_h)
