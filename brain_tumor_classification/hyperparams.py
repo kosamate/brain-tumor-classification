@@ -8,15 +8,15 @@ CLASSES = [
     "pituitary_tumor",
 ]
 BATCH_SIZE = 64
-LEARNING_RATE = 1e-5
-EPOCHS = 12
+LEARNING_RATE = 2e-5
+EPOCHS = 30
 INPUT_SIZE = 128
 
 from model import (
-    TumorClassificationCNN_Conv,
-    TumorClassificationCNN_FC,
-    TumorClassificationCNN_Mixed,
-    TumorClassificationCNN_Conv_Norm,
+    TC_CNN_Conv,
+    TC_CNN_FC,
+    TC_CNN_Mixed,
+    TC_CNN_Conv_Norm,
     DogClassificationCNN,
     TC_CNN_Big,
 )

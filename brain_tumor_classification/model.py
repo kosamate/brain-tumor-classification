@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from hyperparams import INPUT_SIZE, CLASSES
 
 
-class TumorClassificationCNN_FC(nn.Module):  # 2
+class TC_CNN_FC(nn.Module):  # 2
     def __init__(self):
         super().__init__()
         # convolutional layers
@@ -38,7 +38,7 @@ class TumorClassificationCNN_FC(nn.Module):  # 2
         return x
 
 
-class TumorClassificationCNN_Conv(nn.Module):  # 1
+class TC_CNN_Conv(nn.Module):  # 1
     def __init__(self) -> None:
         super().__init__()
         # convolutional layers
@@ -68,7 +68,7 @@ class TumorClassificationCNN_Conv(nn.Module):  # 1
         return x
 
 
-class TumorClassificationCNN_Mixed(nn.Module):  # 3
+class TC_CNN_Mixed(nn.Module):  # 3
     def __init__(self):
         super().__init__()
         # convolutional layers
@@ -100,7 +100,7 @@ class TumorClassificationCNN_Mixed(nn.Module):  # 3
         return x
 
 
-class TumorClassificationCNN_Conv_Norm(nn.Module):
+class TC_CNN_Conv_Norm(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         # convolutional layers
@@ -133,7 +133,7 @@ class TumorClassificationCNN_Conv_Norm(nn.Module):
         return x
 
 
-class TumorClassificationCNN_Mixed_Norm(nn.Module):
+class TC_CNN_Mixed_Norm(nn.Module):
     def __init__(self):
         super().__init__()
         # convolutional layers
@@ -191,7 +191,7 @@ class DogClassificationCNN(nn.Module):
         return x
 
 
-class TC_CNN(nn.Module):
+class TC_CNN_Normal(nn.Module):
     def __init__(self):
         super().__init__()
 
