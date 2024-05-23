@@ -22,7 +22,6 @@ def main():
             model,
             train_dl,
             val_dl,
-            BATCH_SIZE,
             epochs=EPOCHS,
             learning_rate=LEARNING_RATE,
         )

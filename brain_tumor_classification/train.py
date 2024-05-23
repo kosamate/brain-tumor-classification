@@ -1,3 +1,4 @@
+import torch
 from torch import Tensor, no_grad, optim
 from torch.nn import Module as CNN, CrossEntropyLoss
 import time
@@ -16,7 +17,6 @@ def train(
     net: CNN,
     train_dl: DataLoader,
     val_dl: DataLoader,
-    batch_size: int,
     epochs: int,
     learning_rate: float,
 ) -> Tuple[List[float], List[float]]:
@@ -29,6 +29,8 @@ def train(
     train_history = []
     val_history = []
     training_start_time = int(time.time())
+    overfitting = False
+    best = {"epoch":0, "loss":1000}
 
     total_val_loss = 0.0
     # Do a pass on the validation set# We don't need to compute gradient,
@@ -89,9 +91,22 @@ def train(
         val_history.append(val_loss_h)
         print(f"Validation loss = {val_loss_h:.4f}")
 
-        # if epoch > 2:
-        #     if val_loss_h > val_history[-1] and val_loss_h > val_history[-2]:
-        #         break  # stop the training if overfitting
+        torch.save(net, f"model{epoch}")
+
+        if best["loss"] > val_loss_h:
+            best["loss"] = val_loss_h
+            best["epoch"] = epoch
+
+        if epoch > 4:
+            if (
+                val_history[-1] > val_history[-2]
+                and val_history[-1] > val_history[-3]
+                and val_history[-1] > val_history[-4]
+            ):
+                overfitting = True
+                break  # stop the training if overfitting
+    if overfitting:
+        net = torch.load(f"model{best["epoch"]}")
     delta_time = time.time() - training_start_time
     print(f"Training Finished, took {delta_time // 60:.0f} minutes {delta_time % 60:.0f} seconds")
     return train_history, val_history
