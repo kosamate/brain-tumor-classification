@@ -1,7 +1,7 @@
 from __future__ import annotations
 import sys
 from typing import Tuple, TextIO, List
-from pathlib import Path
+from hyperparams import RESULT_PATH
 
 
 class _Tee:
@@ -19,7 +19,7 @@ class _Tee:
 
 
 class Redirect:
-    _RESULTS_PATH = Path("D:/Project/Dipterv/Results")
+    _RESULTS_PATH = RESULT_PATH # add folder path
     _NAME_TEMPLATE = "class_log_CNN{n}.txt"
 
     def __init__(self, bypass=False) -> None:

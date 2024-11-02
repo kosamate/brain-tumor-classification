@@ -11,7 +11,8 @@ from hyperparams import INPUT_SIZE, BATCH_SIZE
 def load_data() -> Tuple[DataLoader, DataLoader, DataLoader]:
     # Init variables and constants
     train_loader, val_loader, test_loader = None, None, None
-    SOURCE = "D:\\Project\\Dipterv\\Datasets\\brain_tumor_mri_2d_4class\\{purpose}"
+    # Download dataset from: https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri
+    SOURCE = "brain_tumor_mri_2d_4class\\{purpose}"
 
     # Prepare transforms
     transform_default = transforms.Compose(

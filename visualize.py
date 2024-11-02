@@ -1,11 +1,11 @@
 from torch import Tensor
 import matplotlib.pyplot as plt
 import seaborn as sns
-from hyperparams import CLASSES
+from hyperparams import CLASSES, RESULT_PATH
 from typing import List
 
-_CLASSIFICATION_PATH_TEMPLATE = "D:/Project/Dipterv/Results/class_result_CNN{test_case}.png"
-_TRAINING_PATH_TEMPLATE = "D:/Project/Dipterv/Results/class_training_CNN{test_case}.png"
+_CLASSIFICATION_PATH_TEMPLATE = RESULT_PATH.name + "/class_result_CNN{test_case}.png"
+_TRAINING_PATH_TEMPLATE = RESULT_PATH.name + "/class_training_CNN{test_case}.png"
 
 
 def show_sample(img: Tensor, label_idx: int) -> None:

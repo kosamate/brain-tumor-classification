@@ -1,5 +1,6 @@
 from torch.nn import Module
 from torchsummary import summary
+import pathlib
 
 CLASSES = [
     "glioma_tumor",
@@ -11,6 +12,7 @@ BATCH_SIZE = 64
 LEARNING_RATE = 2e-5
 EPOCHS = 30
 INPUT_SIZE = 128
+RESULT_PATH = pathlib.Path("D:/D:/Project/Dipterv/Results/")
 
 from model import (
     TC_CNN_Conv,
