@@ -1,17 +1,24 @@
+import abc
 import torch
 from torch import nn
 from torch.nn import functional as F
-from hyperparams import INPUT_SIZE, CLASSES
 
 
-class TC_CNN_FC(nn.Module):  # 2
-    def __init__(self):
+class TumorClassification(nn.Module, abc.ABC):
+    def __init__(self, input_size: int, class_count: int):
         super().__init__()
+        self._input_size = input_size
+        self._class_count = class_count
+
+
+class TC_CNN_FC(TumorClassification):  # 2
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
         # convolutional layers
         self.conv1 = nn.Conv2d(1, 8, 3, padding=1)  # output dim: in + 2 * padding - filter + 1
         self.conv2 = nn.Conv2d(8, 16, 3, padding=1)
         # linear layers
-        self.fc1 = nn.Linear(16 * (INPUT_SIZE // 4) * (INPUT_SIZE // 4), 1024)
+        self.fc1 = nn.Linear(16 * (self._input_size // 4) * (self._input_size // 4), 1024)
         self.fc2 = nn.Linear(1024, 256)
         self.fc3 = nn.Linear(256, 128)
         self.fc4 = nn.Linear(128, 64)
@@ -25,7 +32,6 @@ class TC_CNN_FC(nn.Module):  # 2
         # convolutional layers with ReLU and pooling
         x = self.pool(F.relu(self.conv1(x)))  #  8 x 64 x 64
         x = self.pool(F.relu(self.conv2(x)))  # 16 x 32 x 32
-        # TODO több réteg, legalább 5 réteg, nem kell annxi FC a végére
         # flattening the image
         x = torch.flatten(x, 1)
         # linear layers
@@ -34,13 +40,12 @@ class TC_CNN_FC(nn.Module):  # 2
         x = self.dropout(F.relu(self.fc3(x)))
         x = self.dropout(F.relu(self.fc4(x)))
         x = self.fc5(x)
-        # TODO log softmax
         return x
 
 
-class TC_CNN_Conv(nn.Module):  # 1
-    def __init__(self) -> None:
-        super().__init__()
+class TC_CNN_Conv(TumorClassification):  # 1
+    def __init__(self, input_size: int, class_count: int) -> None:
+        super().__init__(input_size, class_count)
         # convolutional layers
         self.conv1 = nn.Conv2d(1, 8, 3, padding=1)  # output dim: in + 2 * padding - filter + 1
         self.conv2 = nn.Conv2d(8, 16, 3, padding=1)
@@ -48,7 +53,7 @@ class TC_CNN_Conv(nn.Module):  # 1
         self.conv4 = nn.Conv2d(32, 16, 3, padding=1)
         self.conv5 = nn.Conv2d(16, 8, 3, padding=1)
         # linear layers
-        self.fc = nn.Linear(8 * 4 * 4, len(CLASSES))
+        self.fc = nn.Linear(8 * 4 * 4, self._class_count)
         # max pooling
         self.pool = nn.MaxPool2d(2, 2)
 
@@ -68,15 +73,15 @@ class TC_CNN_Conv(nn.Module):  # 1
         return x
 
 
-class TC_CNN_Mixed(nn.Module):  # 3
-    def __init__(self):
-        super().__init__()
+class TC_CNN_Mixed(TumorClassification):  # 3
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
         # convolutional layers
         self.conv1 = nn.Conv2d(1, 4, 3, padding=1)  # output dim: in + 2 * padding - filter + 1
         self.conv2 = nn.Conv2d(4, 8, 3, padding=1)
         self.conv3 = nn.Conv2d(8, 16, 3, padding=1)
         # linear layers
-        self.fc1 = nn.Linear(16 * (INPUT_SIZE // 8) * (INPUT_SIZE // 8), 1024)
+        self.fc1 = nn.Linear(16 * (self._input_size // 8) * (self._input_size // 8), 1024)
         self.fc2 = nn.Linear(1024, 256)
         self.fc3 = nn.Linear(256, 64)
         self.fc4 = nn.Linear(64, 4)
@@ -100,9 +105,9 @@ class TC_CNN_Mixed(nn.Module):  # 3
         return x
 
 
-class TC_CNN_Conv_Norm(nn.Module):
-    def __init__(self) -> None:
-        super().__init__()
+class TC_CNN_Conv_Norm(TumorClassification):
+    def __init__(self, input_size: int, class_count: int) -> None:
+        super().__init__(input_size, class_count)
         # convolutional layers
         self.conv1 = nn.Conv2d(1, 8, 3, padding=1)  # output dim: in + 2 * padding - filter + 1
         self.conv2 = nn.Conv2d(8, 16, 3, padding=1)
@@ -110,7 +115,7 @@ class TC_CNN_Conv_Norm(nn.Module):
         self.conv4 = nn.Conv2d(32, 16, 3, padding=1)
         self.conv5 = nn.Conv2d(16, 8, 3, padding=1)
         # linear layers
-        self.fc = nn.Linear(8 * 4 * 4, len(CLASSES))
+        self.fc = nn.Linear(8 * 4 * 4, self._class_count)
         # max pooling
         self.pool = nn.MaxPool2d(2, 2)
         # batch norm
@@ -133,9 +138,9 @@ class TC_CNN_Conv_Norm(nn.Module):
         return x
 
 
-class TC_CNN_Mixed_Norm(nn.Module):
-    def __init__(self):
-        super().__init__()
+class TC_CNN_Mixed_Norm(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
         # convolutional layers
         self.conv1 = nn.Conv2d(1, 4, 3, padding=1)  # output dim: in + 2 * padding - filter + 1
         self.conv2 = nn.Conv2d(4, 8, 3, padding=1)
@@ -143,7 +148,7 @@ class TC_CNN_Mixed_Norm(nn.Module):
 
         self.bn1 = nn.BatchNorm2d(8)
         # linear layers
-        self.fc1 = nn.Linear(16 * (INPUT_SIZE // 8) * (INPUT_SIZE // 8), 1024)
+        self.fc1 = nn.Linear(16 * (self._input_size // 8) * (self._input_size // 8), 1024)
         self.fc2 = nn.Linear(1024, 256)
         self.fc3 = nn.Linear(256, 64)
         self.fc4 = nn.Linear(64, 4)
@@ -167,9 +172,9 @@ class TC_CNN_Mixed_Norm(nn.Module):
         return x
 
 
-class DogClassificationCNN(nn.Module):
-    def __init__(self):
-        super().__init__()
+class DogClassificationCNN(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
 
         self.conv1 = nn.Conv2d(1, 16, 3, stride=1)
         self.conv2 = nn.Conv2d(16, 32, 3, stride=1)
@@ -179,7 +184,7 @@ class DogClassificationCNN(nn.Module):
         self.fc1 = nn.Linear(32 * 30 * 30, 128)
         self.bn2 = nn.BatchNorm1d(128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, len(CLASSES))
+        self.fc3 = nn.Linear(64, self._class_count)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -191,9 +196,9 @@ class DogClassificationCNN(nn.Module):
         return x
 
 
-class TC_CNN_Normal(nn.Module):
-    def __init__(self):
-        super().__init__()
+class TC_CNN_Normal(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
 
         self.conv1 = nn.Conv2d(1, 16, 3, stride=1)
         self.conv2 = nn.Conv2d(16, 32, 3, stride=1)
@@ -203,7 +208,7 @@ class TC_CNN_Normal(nn.Module):
         self.fc1 = nn.Linear(32 * 30 * 30, 128)
         self.bn2 = nn.BatchNorm1d(128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, len(CLASSES))
+        self.fc3 = nn.Linear(64, self._class_count)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -215,9 +220,9 @@ class TC_CNN_Normal(nn.Module):
         return x
 
 
-class TC_CNN_Big(nn.Module):
-    def __init__(self):
-        super().__init__()
+class TC_CNN_Big(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
 
         self.conv1 = nn.Conv2d(1, 16, 3, stride=1)
         self.conv2 = nn.Conv2d(16, 32, 3, stride=1)
@@ -229,7 +234,7 @@ class TC_CNN_Big(nn.Module):
         self.fc1 = nn.Linear(64 * 14 * 14, 128)
         self.bn2 = nn.BatchNorm1d(128)
         self.fc2 = nn.Linear(128, 64)
-        self.fc3 = nn.Linear(64, len(CLASSES))
+        self.fc3 = nn.Linear(64, self._class_count)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
@@ -239,4 +244,50 @@ class TC_CNN_Big(nn.Module):
         x = F.relu(self.bn2(self.fc1(x)))
         x = F.relu(self.fc2(x))
         x = F.log_softmax(self.fc3(x), dim=1)
+        return x
+
+
+class TC_Final(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
+
+        self.conv32 = nn.Conv2d(1, 32, 3, stride=1)
+        self.conv32to64 = nn.Conv2d(32, 64, 3, stride=1)
+
+        self.conv64to64 = nn.Conv2d(64, 64, 3, stride=1)
+        self.conv64to128 = nn.Conv2d(64, 128, 3, stride=1)
+
+        self.conv128to128 = nn.Conv2d(128, 128, 3, stride=1)
+        self.conv256 = nn.Conv2d(128, 256, 3, stride=1)
+
+        self.pool = nn.MaxPool2d(2, 2)
+
+        self.fc1 = nn.Linear(6400, 512)
+        self.fc2 = nn.Linear(512, 512)
+        self.fc3 = nn.Linear(512, self._class_count)
+
+    def forward(self, x):
+        # input 148 x 148
+        x = F.relu(self.conv32(x))
+        x = F.relu(self.conv32to64(x))
+        x = self.pool(x)  # output 72x72
+
+        x = F.relu(self.conv64to64(x))
+        x = F.relu(self.conv64to64(x))
+        x = self.pool(x)  # output 34x34
+
+        x = F.relu(self.conv64to128(x))
+        x = F.relu(self.conv128to128(x))
+        x = F.relu(self.conv128to128(x))
+        x = self.pool(x)  # output 14x14
+
+        x = F.relu(self.conv128to128(x))
+        x = F.relu(self.conv256(x))
+        x = self.pool(x)  # output: 5x5
+
+        x = x.view(-1, 6400)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.log_softmax(self.fc3(x), dim=1)
+
         return x

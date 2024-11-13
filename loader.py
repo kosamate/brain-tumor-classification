@@ -1,24 +1,23 @@
-from typing import Tuple
 from torch import Generator
 from torch.utils.data import random_split
 from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from hyperparams import INPUT_SIZE, BATCH_SIZE
+from hyperparams import Hyperparameter
 
 
-def load_data() -> Tuple[DataLoader, DataLoader, DataLoader]:
+def load_data(params: Hyperparameter) -> tuple[DataLoader, DataLoader, DataLoader]:
     # Init variables and constants
     train_loader, val_loader, test_loader = None, None, None
     # Download dataset from: https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri
-    SOURCE = "brain_tumor_mri_2d_4class\\{purpose}"
+    SOURCE = params.dataset_path.as_posix() + "\\{purpose}"
 
     # Prepare transforms
     transform_default = transforms.Compose(
         [
             transforms.ToTensor(),
-            transforms.Resize((INPUT_SIZE, INPUT_SIZE)),
+            transforms.Resize((params.input_size, params.input_size)),
             transforms.Grayscale(num_output_channels=1),
             transforms.Normalize((0.5), (0.5)),
         ]
@@ -42,7 +41,7 @@ def load_data() -> Tuple[DataLoader, DataLoader, DataLoader]:
 
     train_loader = DataLoader(
         trainset,
-        batch_size=BATCH_SIZE,
+        batch_size=params.batch_size,
         shuffle=True,
         num_workers=2,
     )
@@ -67,13 +66,13 @@ def load_data() -> Tuple[DataLoader, DataLoader, DataLoader]:
     )
     test_loader = DataLoader(
         test_set,
-        batch_size=BATCH_SIZE,
+        batch_size=params.batch_size,
         shuffle=False,
         num_workers=2,
     )
     val_loader = DataLoader(
         val_set,
-        batch_size=BATCH_SIZE,
+        batch_size=params.batch_size,
         shuffle=False,
         num_workers=2,
     )

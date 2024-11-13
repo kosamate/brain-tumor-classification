@@ -1,25 +1,24 @@
 import torch
-from torch import Tensor, no_grad, optim
-from torch.nn import Module as CNN, CrossEntropyLoss
 import time
-from typing import Tuple, List
+from torch import Tensor, no_grad, optim
 from torch.utils.data.dataloader import DataLoader
+import model
 
 
-def create_loss_and_optimizer(net: CNN, learning_rate=0.001):
-    criterion = CrossEntropyLoss()
+def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.001):
+    criterion = torch.nn.CrossEntropyLoss()
     # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
     return criterion, optimizer
 
 
 def train(
-    net: CNN,
+    net: model.TumorClassification,
     train_dl: DataLoader,
     val_dl: DataLoader,
     epochs: int,
     learning_rate: float,
-) -> Tuple[List[float], List[float]]:
+) -> tuple[list[float], list[float]]:
 
     batches = len(train_dl)
     val_batches = len(val_dl)
@@ -30,7 +29,7 @@ def train(
     val_history = []
     training_start_time = int(time.time())
     overfitting = False
-    best = {"epoch":0, "loss":1000}
+    best = {"epoch": 0, "loss": 1000}
 
     total_val_loss = 0.0
     # Do a pass on the validation set# We don't need to compute gradient,
