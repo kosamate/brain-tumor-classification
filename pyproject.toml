@@ -8,6 +8,3 @@ version = "0.1.0"
 description = "A package for training and using a model which classifies different brain tumors."
 authors = [{ name = "György Máté Kósa", email = "kosam0131@gmail.com" }]
 dependencies = ["numpy", "torch", "torchvision", "seaborn", "matplotlib"]
-
-[tool.setuptools]
-py-modules = []
