@@ -2,7 +2,7 @@ import torch
 import time
 from torch import Tensor, no_grad, optim
 from torch.utils.data.dataloader import DataLoader
-import model
+from brain_tumor_classification import model
 
 
 def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.001):

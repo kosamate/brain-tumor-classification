@@ -4,7 +4,7 @@ from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
 
-from hyperparams import Hyperparameter
+from brain_tumor_classification.hyperparams import Hyperparameter
 
 
 def load_data(params: Hyperparameter) -> tuple[DataLoader, DataLoader, DataLoader]:

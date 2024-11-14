@@ -1,7 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
-import hyperparams
+from brain_tumor_classification import hyperparams
 
 
 class Drawer:

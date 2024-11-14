@@ -3,12 +3,12 @@ import numpy as np
 import torch
 from torch.utils.data.dataloader import DataLoader
 
-import hyperparams
-import draw
-from train import train
-from loader import load_data
-from model import TC_Final
-from redirect import Redirect
+from brain_tumor_classification import hyperparams
+from brain_tumor_classification import draw
+from brain_tumor_classification.train import train
+from brain_tumor_classification.loader import load_data
+from brain_tumor_classification.model import TC_Final
+from brain_tumor_classification.redirect import Redirect
 
 
 def main(params: hyperparams.Hyperparameter):

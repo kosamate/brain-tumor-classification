@@ -3,7 +3,7 @@ from typing import Self
 import pathlib
 import textwrap
 import torchsummary
-from model import TumorClassification
+from brain_tumor_classification.model import TumorClassification
 
 
 @dataclasses.dataclass
