@@ -105,7 +105,7 @@ def train(
                 overfitting = True
                 break  # stop the training if overfitting
     if overfitting:
-        net = torch.load(f"model{best["epoch"]}")
+        net = torch.load(f"model{best['epoch']}")
     delta_time = time.time() - training_start_time
     print(f"Training Finished, took {delta_time // 60:.0f} minutes {delta_time % 60:.0f} seconds")
     return train_history, val_history
