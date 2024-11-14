@@ -7,7 +7,7 @@ name = "brain_tumor_classification"
 version = "0.1.0"
 description = "A package for training and using a model which classifies different brain tumors."
 authors = [{ name = "Gyorgy Mate Kosa", email = "kosam0131@gmail.com" }]
-dependencies = ["numpy", "torch", "torchvision", "seaborn", "matplotlib"]
+dependencies = ["numpy", "torch", "torchvision", "torch-summary ", "seaborn", "matplotlib"]
 
 # [tool.setuptools]
 # packages = ["brain_tumor_classification"]
