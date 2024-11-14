@@ -11,7 +11,7 @@ def load_data(params: Hyperparameter) -> tuple[DataLoader, DataLoader, DataLoade
     # Init variables and constants
     train_loader, val_loader, test_loader = None, None, None
     # Download dataset from: https://www.kaggle.com/datasets/sartajbhuvaji/brain-tumor-classification-mri
-    SOURCE = params.dataset_path.as_posix() + "\\{purpose}"
+    SOURCE = params.dataset_path.as_posix() + "/{purpose}"
 
     # Prepare transforms
     transform_default = transforms.Compose(

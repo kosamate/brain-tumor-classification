@@ -9,8 +9,5 @@ description = "A package for training and using a model which classifies differe
 authors = [{ name = "Gyorgy Mate Kosa", email = "kosam0131@gmail.com" }]
 dependencies = ["numpy", "torch", "torchvision", "torch-summary ", "seaborn", "matplotlib"]
 
-# [tool.setuptools]
-# packages = ["brain_tumor_classification"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
