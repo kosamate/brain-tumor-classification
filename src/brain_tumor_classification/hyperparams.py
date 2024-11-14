@@ -1,5 +1,4 @@
 import dataclasses
-from typing import Self
 import pathlib
 import textwrap
 import torchsummary
@@ -28,7 +27,7 @@ class Hyperparameter:
         input_size: int,
         result_path: str,
         dataset_path: str,
-    ) -> Self:
+    ) -> "Hyperparameter":
         return cls(
             model(input_size, len(classes)),
             classes,
