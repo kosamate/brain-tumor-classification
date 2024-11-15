@@ -17,13 +17,10 @@ def main(params: hyperparams.Hyperparameter):
         print(params)
         train_dl, val_dl, test_dl = load_data(params)
         print(f"Data has been loaded. Batches: train: {len(train_dl)} val: {len(val_dl)} test: {len(test_dl)}")
-        model = params.model
         train_h, val_h = train(
-            model,
+            params,
             train_dl,
             val_dl,
-            epochs=params.epochs,
-            learning_rate=params.learing_rate,
         )
         test(params, drawer, test_dl, test_case_number)
         drawer.save_train_res_plot(train_h, val_h, test_case_number)

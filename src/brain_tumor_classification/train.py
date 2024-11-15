@@ -3,6 +3,7 @@ import time
 from torch import Tensor, no_grad, optim
 from torch.utils.data.dataloader import DataLoader
 from brain_tumor_classification import model
+from brain_tumor_classification import hyperparams
 
 
 def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.001):
@@ -13,16 +14,20 @@ def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.00
 
 
 def train(
-    net: model.TumorClassification,
+    params: hyperparams.Hyperparameter,
     train_dl: DataLoader,
     val_dl: DataLoader,
-    epochs: int,
-    learning_rate: float,
 ) -> tuple[list[float], list[float]]:
+
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    net = params.model
+
+    net.to(device)
 
     batches = len(train_dl)
     val_batches = len(val_dl)
-    criterion, optimizer = create_loss_and_optimizer(net, learning_rate)
+    criterion, optimizer = create_loss_and_optimizer(net, params.learing_rate)
+    criterion.to(device)
 
     # Init variables used for plotting the loss
     train_history = []
@@ -45,7 +50,7 @@ def train(
     val_loss_h = total_val_loss / val_batches
     print(f"Validation loss = {val_loss_h:.4f}")
 
-    for epoch in range(epochs):
+    for epoch in range(params.epochs):
         # loop over the dataset multiple times
         running_loss = 0.0
         log_period = batches // 10
