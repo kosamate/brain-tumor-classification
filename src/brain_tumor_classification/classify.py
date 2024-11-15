@@ -64,7 +64,7 @@ def test(params: hyperparams.Hyperparameter, drawer: draw.Drawer, test_loader: D
         # convert output probabilities to predicted class
         _, pred = torch.max(output, 1)
         # compare predictions to true label
-        correct_tensor = pred.eq(target.data.view_as(pred))
+        correct_tensor = pred.eq(target_cuda.data.view_as(pred))
         correct = np.squeeze(correct_tensor.detach().cpu().numpy())
         # calculate test accuracy for each object class
         for i in range(len(target)):
