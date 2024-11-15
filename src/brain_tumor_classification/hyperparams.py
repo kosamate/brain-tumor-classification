@@ -2,6 +2,7 @@ import dataclasses
 import pathlib
 import textwrap
 import torchsummary
+import torch
 from brain_tumor_classification.model import TumorClassification
 
 
@@ -15,6 +16,7 @@ class Hyperparameter:
     input_size: int
     result_path: pathlib.Path
     dataset_path: pathlib.Path
+    device: str
 
     @classmethod
     def build(
@@ -28,8 +30,9 @@ class Hyperparameter:
         result_path: str,
         dataset_path: str,
     ) -> "Hyperparameter":
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         return cls(
-            model(input_size, len(classes)),
+            model(input_size, len(classes)).to(device),
             classes,
             batch_size,
             learing_rate,
@@ -37,6 +40,7 @@ class Hyperparameter:
             input_size,
             pathlib.Path(result_path),
             pathlib.Path(dataset_path),
+            device=device,
         )
 
     def __repr__(self) -> str:

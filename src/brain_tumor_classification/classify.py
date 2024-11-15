@@ -51,17 +51,18 @@ def test(params: hyperparams.Hyperparameter, drawer: draw.Drawer, test_loader: D
     points = np.array([[0] * params.class_count for _ in range(params.class_count)], np.int32)
 
     model.eval()  # Prepare model for testing
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.CrossEntropyLoss().to(params.device)
 
     for data, target in test_loader:
+        data, target_cuda = data.to(params.device), target.to(params.device)
         # forward pass
         output = model(data)
         # batch loss
-        loss = criterion(output, target)
+        loss = criterion(output, target_cuda)
         # test loss update
         test_loss += loss.item() * data.size(0)
         # convert output probabilities to predicted class
-        _, pred = torch.max(output, 1)
+        _, pred = torch.max(output.detach().cpu().numpy(), 1)
         # compare predictions to true label
         correct_tensor = pred.eq(target.data.view_as(pred))
         correct = np.squeeze(correct_tensor.numpy())
@@ -73,7 +74,7 @@ def test(params: hyperparams.Hyperparameter, drawer: draw.Drawer, test_loader: D
             points[int(pred.data[i]), int(label)] += 1
 
     # average test loss
-    test_loss = test_loss / len(test_loader.dataset)
+    test_loss = test_loss.detach().cpu().numpy() / len(test_loader.dataset)
     print(f"Test Loss: {test_loss:.4f}")
 
     for i, label in enumerate(params.classes):

@@ -8,7 +8,6 @@ from brain_tumor_classification import hyperparams
 
 def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.001):
     criterion = torch.nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
     return criterion, optimizer
 
@@ -19,15 +18,12 @@ def train(
     val_dl: DataLoader,
 ) -> tuple[list[float], list[float]]:
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     net = params.model
-
-    net.to(device)
 
     batches = len(train_dl)
     val_batches = len(val_dl)
     criterion, optimizer = create_loss_and_optimizer(net, params.learing_rate)
-    criterion.to(device)
+    criterion = criterion.to(params.device)
 
     # Init variables used for plotting the loss
     train_history = []
@@ -43,8 +39,7 @@ def train(
         net.eval()
         for inputs, labels in val_dl:
             # Forward pass
-            inputs.to(device)
-            labels.to(device)
+            inputs, labels = inputs.to(params.device), labels.to(params.device)
             predictions = net(inputs)
             val_loss: Tensor = criterion(predictions, labels)
             total_val_loss += val_loss.item()
@@ -61,8 +56,7 @@ def train(
             # zero the parameter gradients
             optimizer.zero_grad()
             # forward + backward + optimize
-            inputs.to(device)
-            labels.to(device)
+            inputs, labels = inputs.to(params.device), labels.to(params.device)
             outputs = net(inputs)
             loss: Tensor = criterion(outputs, labels)
             loss.backward()
