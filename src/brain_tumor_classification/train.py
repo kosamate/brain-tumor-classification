@@ -43,6 +43,8 @@ def train(
         net.eval()
         for inputs, labels in val_dl:
             # Forward pass
+            inputs.to(device)
+            labels.to(device)
             predictions = net(inputs)
             val_loss: Tensor = criterion(predictions, labels)
             total_val_loss += val_loss.item()
