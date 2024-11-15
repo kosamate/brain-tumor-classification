@@ -59,6 +59,8 @@ def train(
             # zero the parameter gradients
             optimizer.zero_grad()
             # forward + backward + optimize
+            inputs.to(device)
+            labels.to(device)
             outputs = net(inputs)
             loss: Tensor = criterion(outputs, labels)
             loss.backward()
