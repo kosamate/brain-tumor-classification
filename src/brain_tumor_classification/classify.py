@@ -62,10 +62,10 @@ def test(params: hyperparams.Hyperparameter, drawer: draw.Drawer, test_loader: D
         # test loss update
         test_loss += loss.item() * data.size(0)
         # convert output probabilities to predicted class
-        _, pred = torch.max(output.detach().cpu().numpy(), 1)
+        _, pred = torch.max(output, 1)
         # compare predictions to true label
         correct_tensor = pred.eq(target.data.view_as(pred))
-        correct = np.squeeze(correct_tensor.numpy())
+        correct = np.squeeze(correct_tensor.detach().cpu().numpy())
         # calculate test accuracy for each object class
         for i in range(len(target)):
             label = target.data[i]
