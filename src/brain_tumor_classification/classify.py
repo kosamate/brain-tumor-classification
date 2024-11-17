@@ -74,7 +74,7 @@ def test(params: hyperparams.Hyperparameter, drawer: draw.Drawer, test_loader: D
             points[int(pred.data[i]), int(label)] += 1
 
     # average test loss
-    test_loss = test_loss.detach().cpu().numpy() / len(test_loader.dataset)
+    test_loss = test_loss / len(test_loader.dataset)
     print(f"Test Loss: {test_loss:.4f}")
 
     for i, label in enumerate(params.classes):
