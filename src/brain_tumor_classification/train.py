@@ -94,7 +94,7 @@ def train(
         val_history.append(val_loss_h)
         print(f"Validation loss = {val_loss_h:.4f}")
 
-        torch.save(net, f"model{epoch}")
+        torch.save(net.state_dict(), f"model{epoch}")
 
         if best["loss"] > val_loss_h:
             best["loss"] = val_loss_h
@@ -109,7 +109,7 @@ def train(
                 overfitting = True
                 break  # stop the training if overfitting
     if overfitting:
-        params.model = torch.load(f"model{best['epoch']}", weights_only=True)
+        params.model = net.load_state_dict(torch.load(f"model{best['epoch']}", weights_only=True))
     delta_time = time.time() - training_start_time
     print(f"Training Finished, took {delta_time // 60:.0f} minutes {delta_time % 60:.0f} seconds")
     return train_history, val_history
