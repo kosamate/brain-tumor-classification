@@ -36,7 +36,7 @@ class Redirect:
     def __exit__(self, *args) -> None:
         sys.stdout.flush()
         sys.stdout = self._original_out
-        for file in self._files:
+        for file in self._files[0:-1]:
             file.close()
 
     def _redirect_print_to_files(self, files: list[TextIO]) -> None:
