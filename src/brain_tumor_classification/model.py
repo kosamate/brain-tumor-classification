@@ -294,3 +294,55 @@ class TC_Final(TumorClassification):
         x = F.log_softmax(self.fc3(x), dim=1)
 
         return x
+
+
+class TC_Final_D(TumorClassification):
+    def __init__(self, input_size: int, class_count: int):
+        super().__init__(input_size, class_count)
+
+        self.conv32 = nn.Conv2d(1, 32, 3, stride=1)
+        self.conv32to64 = nn.Conv2d(32, 64, 3, stride=1)
+
+        self.conv64to64 = nn.Conv2d(64, 64, 3, stride=1)
+        self.conv64to128 = nn.Conv2d(64, 128, 3, stride=1)
+
+        self.conv128to128 = nn.Conv2d(128, 128, 3, stride=1)
+        self.conv256 = nn.Conv2d(128, 256, 3, stride=1)
+
+        self.pool = nn.MaxPool2d(2, 2)
+        self.dropout = nn.Dropout(0.35)
+
+        self.fc1 = nn.Linear(6400, 512)
+        self.fc2 = nn.Linear(512, 512)
+        self.fc3 = nn.Linear(512, self._class_count)
+
+    def forward(self, x):
+        # input 148 x 148
+        x = F.relu(self.conv32(x))
+        x = F.relu(self.bn64(self.conv32to64(x)))
+        x = self.pool(x)  # output 72x72
+        x = self.dropout(x)
+
+        x = F.relu(self.conv64to64(x))
+        x = F.relu(self.bn64(self.conv64to64(x)))
+        x = self.pool(x)  # output 34x34
+        x = self.dropout(x)
+
+        x = F.relu(self.conv64to128(x))
+        x = F.relu(self.conv128to128(x))
+        x = F.relu(self.bn128(self.conv128to128(x)))
+        x = self.pool(x)  # output 14x14
+        x = self.dropout(x)
+
+        x = F.relu(self.conv128to128(x))
+        x = F.relu(self.bn256(self.conv256(x)))
+        x = self.pool(x)  # output: 5x5
+        x = self.dropout(x)
+
+        x = x.view(-1, 6400)
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = F.relu(self.fc2(x))
+        x = F.log_softmax(self.fc3(x), dim=1)
+
+        return x
