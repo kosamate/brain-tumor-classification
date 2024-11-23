@@ -8,7 +8,7 @@ from brain_tumor_classification import hyperparams
 
 def create_loss_and_optimizer(net: model.TumorClassification, learning_rate=0.001):
     criterion = torch.nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+    optimizer = optim.Adam(net.parameters(), lr=learning_rate, weight_decay=0.0001)
     return criterion, optimizer
 
 
